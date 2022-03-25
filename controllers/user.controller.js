@@ -1,7 +1,7 @@
 import userService from "../services/user.service.js";
 
 class UserController {
-    async registration(req, res) {
+    async registration(req, res, next) {
         try {
             const { email, password } = req.body;
             const userData = await userService.registration(email, password);
@@ -11,34 +11,42 @@ class UserController {
             });
             return res.json(userData);
         } catch (error) {
-            console.log(error);
+            next(error);
         }
     }
-    async login(req, res) {
+    async login(req, res, next) {
         try {
-        } catch (error) {}
+        } catch (error) {
+            next(error);
+        }
     }
-    async logout(req, res) {
+    async logout(req, res, next) {
         try {
-        } catch (error) {}
+        } catch (error) {
+            next(error);
+        }
     }
-    async activate(req, res) {
+    async activate(req, res, next) {
         try {
             const activationLink = req.params.link;
             await userService.activate(activationLink);
             return res.redirect(process.env.CLIENT_URL);
         } catch (error) {
-            console.log(error);
+            next(error);
         }
     }
-    async refresh(req, res) {
+    async refresh(req, res, next) {
         try {
-        } catch (error) {}
+        } catch (error) {
+            next(error);
+        }
     }
-    async getUsers(req, res) {
+    async getUsers(req, res, next) {
         try {
             return res.json("get users");
-        } catch (error) {}
+        } catch (error) {
+            next(error);
+        }
     }
 }
 
