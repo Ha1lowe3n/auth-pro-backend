@@ -10,6 +10,5 @@ router.post("/logout");
 router.get("/users", userController.getUsers);
 router.get("/activate/:link", userController.activate);
 router.get("/refresh");
-router.get("/check", userController.check);
 
 export default router;

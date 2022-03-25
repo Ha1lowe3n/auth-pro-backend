@@ -29,7 +29,15 @@ class UserService {
     }
     async login(req, res) {}
     async logout(req, res) {}
-    async activate(req, res) {}
+    async activate(activationLink) {
+        const user = await userModel.findOne({ activationLink });
+        console.log(user);
+        if (!user) {
+            throw new Error("Неккоректная ссылка активации");
+        }
+        user.isActivated = true;
+        await user.save();
+    }
     async refresh(req, res) {}
     async getUsers(req, res) {}
 }

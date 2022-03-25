@@ -1,5 +1,4 @@
 import userService from "../services/user.service.js";
-import tokenService from "../services/access/token.service.js";
 
 class UserController {
     async registration(req, res) {
@@ -25,7 +24,12 @@ class UserController {
     }
     async activate(req, res) {
         try {
-        } catch (error) {}
+            const activationLink = req.params.link;
+            await userService.activate(activationLink);
+            return res.redirect(process.env.CLIENT_URL);
+        } catch (error) {
+            console.log(error);
+        }
     }
     async refresh(req, res) {
         try {
@@ -34,12 +38,6 @@ class UserController {
     async getUsers(req, res) {
         try {
             return res.json("get users");
-        } catch (error) {}
-    }
-    async check(req, res) {
-        try {
-            const data = await tokenService.check(1234);
-            return res.json(data);
         } catch (error) {}
     }
 }

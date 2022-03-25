@@ -21,18 +21,6 @@ class TokenService {
         }
         return await tokenModel.create({ user: userId, refreshToken });
     }
-
-    async check(userId) {
-        console.log("chekc");
-        const mid = mongoose.Types.ObjectId(userId);
-        console.log(mid);
-        const tokenData = await tokenModel.findOne({ user: mongoose.Types.ObjectId(userId) });
-        console.log("chekc 2'");
-        if (tokenData) {
-            return "suka";
-        }
-        return "blyat";
-    }
 }
 
 export default new TokenService();
