@@ -7,6 +7,13 @@ import { UserDto } from "../dto/user.dto.js";
 import tokenService from "./access/token.service.js";
 import { ApiError } from "../exceptions/api-error.js";
 
+const returnTokensAndUserDto = async (user) => {
+    const userDto = new UserDto(user);
+    const tokens = tokenService.generateTokens({ ...userDto });
+    await tokenService.saveToken(userDto.id, tokens.refreshToken);
+    return { ...tokens, user: userDto };
+};
+
 class UserService {
     async registration(email, password) {
         const findUser = await userModel.findOne({ email });
@@ -22,14 +29,24 @@ class UserService {
             `${process.env.API_URL}/activate/${activationLink}`
         );
 
-        const userDto = new UserDto(newUser);
-        const tokens = tokenService.generateTokens({ ...userDto });
-        await tokenService.saveToken(userDto.id, tokens.refreshToken);
-
-        return { ...tokens, user: userDto };
+        return await returnTokensAndUserDto(newUser);
     }
-    async login(req, res) {}
-    async logout(req, res) {}
+    async login(email, password) {
+        const findUser = await userModel.findOne({ email });
+        if (!findUser) {
+            throw ApiError.BadRequest("Пользователь не найден");
+        }
+        const checkPassword = await bcrypt.compare(password, findUser.password);
+        if (!checkPassword) {
+            throw ApiError.BadRequest("Неверный пароль");
+        }
+
+        return await returnTokensAndUserDto(findUser);
+    }
+    async logout(refreshToken) {
+        const token = await tokenService.removeToken(refreshToken);
+        return token;
+    }
     async activate(activationLink) {
         const user = await userModel.findOne({ activationLink });
         console.log(user);
@@ -39,8 +56,19 @@ class UserService {
         user.isActivated = true;
         await user.save();
     }
-    async refresh(req, res) {}
-    async getUsers(req, res) {}
+    async refreshCookie(refreshToken) {
+        const validateRefreshToken = tokenService.validateRefreshToken(refreshToken);
+        const findRefreshToken = await tokenService.findRefreshToken(refreshToken);
+        if (!validateRefreshToken || !findRefreshToken) {
+            throw ApiError.AnauthorizedError();
+        }
+
+        const user = await userModel.findById(validateRefreshToken.id);
+        return await returnTokensAndUserDto(user);
+    }
+    async getUsers() {
+        return await userModel.find();
+    }
 }
 
 export default new UserService();
