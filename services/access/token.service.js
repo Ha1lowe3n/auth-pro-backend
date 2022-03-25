@@ -4,7 +4,7 @@ import tokenModel from "../../models/token.model.js";
 class TokenService {
     generateTokens(payload) {
         const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET_KEY, {
-            expiresIn: "15m",
+            expiresIn: "30m",
         });
         const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET_KEY, {
             expiresIn: "15d",
@@ -12,19 +12,15 @@ class TokenService {
         return { accessToken, refreshToken };
     }
 
-    validateAccessToken(accessToken) {
+    validateToken(token, tokenType) {
         try {
-            const verifyToken = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET_KEY);
-            return verifyToken;
-        } catch (error) {
-            return null;
-        }
-    }
-
-    validateRefreshToken(refreshToken) {
-        try {
-            const verifyToken = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET_KEY);
-            return verifyToken;
+            const userData = jwt.verify(
+                token,
+                tokenType === "access"
+                    ? process.env.JWT_ACCESS_SECRET_KEY
+                    : process.env.JWT_REFRESH_SECRET_KEY
+            );
+            return userData;
         } catch (error) {
             return null;
         }

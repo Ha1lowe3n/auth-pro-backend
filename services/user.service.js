@@ -57,16 +57,17 @@ class UserService {
         await user.save();
     }
     async refreshCookie(refreshToken) {
-        const validateRefreshToken = tokenService.validateRefreshToken(refreshToken);
+        const userData = tokenService.validateToken(refreshToken, "refresh");
+        // console.log(first);
         const findRefreshToken = await tokenService.findRefreshToken(refreshToken);
-        if (!validateRefreshToken || !findRefreshToken) {
+        if (!userData || !findRefreshToken) {
             throw ApiError.AnauthorizedError();
         }
 
-        const user = await userModel.findById(validateRefreshToken.id);
+        const user = await userModel.findById(userData.id);
         return await returnTokensAndUserDto(user);
     }
-    async getUsers() {
+    async getAllUsers() {
         return await userModel.find();
     }
 }
